@@ -7,6 +7,8 @@ use App\Entity\Pays;
 use App\Entity\Devis;
 use App\Entity\Clients;
 use App\Entity\DevisStatut;
+use App\Entity\Transactions;
+use App\Entity\TransactionsTypes;
 use App\Entity\Utilisateurs;
 use Symfony\Component\Uid\Uuid;
 use Doctrine\Persistence\ObjectManager;
@@ -38,6 +40,31 @@ class AppFixtures extends Fixture
         $password = $this->userPasswordHasher->hashPassword($utilisateur, $plainPassword);
         $utilisateur->setPassword($password);
         $manager->persist($utilisateur);
+
+        $types = new TransactionsTypes;
+        $types->setLabel('Virement');
+        $types->setCode('VIREMENT');
+        $manager->persist($types);
+
+        $types = new TransactionsTypes;
+        $types->setLabel('Entrée d\'argent');
+        $types->setCode('IN');
+        $manager->persist($types);
+
+        $types = new TransactionsTypes;
+        $types->setLabel('Sortie d\'argent');
+        $types->setCode('OUT');
+        $manager->persist($types);
+
+        for($i=0; $i<30; $i++){
+            $transaction = new Transactions;
+            $transaction->setLabel($faker->sentence(6, true));
+            $transaction->setMontant($faker->randomFloat(2, 0, 1000));
+            $transaction->setDate($faker->dateTimeBetween('-1 years', 'now'));
+            $transaction->setTransactionsTypes($types);
+            $transaction->setUtilisateur($utilisateur);
+            $manager->persist($transaction);
+        }
 
         $manager->flush();
     }
