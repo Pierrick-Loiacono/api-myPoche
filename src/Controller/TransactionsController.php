@@ -14,7 +14,7 @@ class TransactionsController extends AbstractController
     public function transactions(TransactionsRepository $trepo, SerializerInterface $serializer): JsonResponse
     {
         $transactions = $trepo->findBy([], ['date' => 'DESC']);
-        $json = $serializer->serialize($transactions, 'json', ['groups' => 'transactions:read']);
+        $json = $serializer->serialize($transactions, 'json');
 
         return new JsonResponse($json, 200, [], true);
     }

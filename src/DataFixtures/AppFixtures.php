@@ -46,22 +46,22 @@ class AppFixtures extends Fixture
         $types->setCode('VIREMENT');
         $manager->persist($types);
 
-        $types = new TransactionsTypes;
-        $types->setLabel('Entrée d\'argent');
-        $types->setCode('IN');
-        $manager->persist($types);
+        $typesIN = new TransactionsTypes;
+        $typesIN->setLabel('Entrée d\'argent');
+        $typesIN->setCode('IN');
+        $manager->persist($typesIN);
 
-        $types = new TransactionsTypes;
-        $types->setLabel('Sortie d\'argent');
-        $types->setCode('OUT');
-        $manager->persist($types);
+        $typesOUT = new TransactionsTypes;
+        $typesOUT->setLabel('Sortie d\'argent');
+        $typesOUT->setCode('OUT');
+        $manager->persist($typesOUT);
 
         for($i=0; $i<30; $i++){
             $transaction = new Transactions;
             $transaction->setLabel($faker->sentence(6, true));
-            $transaction->setMontant($faker->randomFloat(2, 0, 1000));
+            $transaction->setMontant($faker->randomFloat(2, -500, 1200));
             $transaction->setDate($faker->dateTimeBetween('-1 years', 'now'));
-            $transaction->setTransactionsTypes($types);
+            $transaction->setTransactionsTypes($transaction->getMontant() > 0 ? $typesIN : $typesOUT);
             $transaction->setUtilisateur($utilisateur);
             $manager->persist($transaction);
         }

@@ -14,19 +14,15 @@ class Transactions
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['transactions:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['transactions:read'])]
     private ?string $label = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: 2)]
-    #[Groups(['transactions:read'])]
     private ?string $montant = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[SerializedName('formatted_date')]
     private ?\DateTimeInterface $date = null;
 
     #[ORM\ManyToOne(inversedBy: 'transactions')]
@@ -35,7 +31,6 @@ class Transactions
 
     #[ORM\ManyToOne(inversedBy: 'transactions')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['transactions:read'])]
     private ?TransactionsTypes $transactions_types = null;
 
     public function getId(): ?int
@@ -103,9 +98,4 @@ class Transactions
         return $this;
     }
 
-    #[Groups(['transactions:read'])]
-    public function getFormattedDate(): ?string
-    {
-        return $this->date ? $this->date->format('d/m/Y') : null;
-    }
 }
