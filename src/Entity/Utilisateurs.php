@@ -58,9 +58,16 @@ class Utilisateurs implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Transactions::class, mappedBy: 'utilisateur', orphanRemoval: true)]
     private Collection $transactions;
 
+    /**
+     * @var Collection<int, Abonnements>
+     */
+    #[ORM\OneToMany(targetEntity: Abonnements::class, mappedBy: 'utilisateur', orphanRemoval: true)]
+    private Collection $abonnements;
+
     public function __construct()
     {
         $this->transactions = new ArrayCollection();
+        $this->abonnements = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -234,6 +241,36 @@ class Utilisateurs implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($transaction->getUtilisateur() === $this) {
                 $transaction->setUtilisateur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Abonnements>
+     */
+    public function getAbonnements(): Collection
+    {
+        return $this->abonnements;
+    }
+
+    public function addAbonnement(Abonnements $abonnement): static
+    {
+        if (!$this->abonnements->contains($abonnement)) {
+            $this->abonnements->add($abonnement);
+            $abonnement->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAbonnement(Abonnements $abonnement): static
+    {
+        if ($this->abonnements->removeElement($abonnement)) {
+            // set the owning side to null (unless already changed)
+            if ($abonnement->getUtilisateur() === $this) {
+                $abonnement->setUtilisateur(null);
             }
         }
 
