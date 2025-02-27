@@ -22,7 +22,6 @@ class Transactions
 
     #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: 2)]
     #[Assert\NotBlank]
-    #[Assert\PositiveOrZero]
     private ?string $montant = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
