@@ -5,8 +5,7 @@ namespace App\Entity;
 use App\Repository\TransactionsRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Serializer\Annotation\SerializedName;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TransactionsRepository::class)]
 class Transactions
@@ -17,20 +16,28 @@ class Transactions
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 255)]
     private ?string $label = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: 2)]
+    #[Assert\NotBlank]
+    #[Assert\PositiveOrZero]
     private ?string $montant = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Assert\NotBlank]
+    #[Assert\Type(\DateTimeInterface::class)]
     private ?\DateTimeInterface $date = null;
 
     #[ORM\ManyToOne(inversedBy: 'transactions')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull]
     private ?Utilisateurs $utilisateur = null;
 
     #[ORM\ManyToOne(inversedBy: 'transactions')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull]
     private ?TransactionsTypes $transactions_types = null;
 
     public function getId(): ?int
@@ -97,5 +104,4 @@ class Transactions
 
         return $this;
     }
-
 }
