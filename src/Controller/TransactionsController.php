@@ -35,32 +35,41 @@ class TransactionsController extends AbstractController
             return new JsonResponse(['error' => 'Données invalides'], 400); // Données sont invalides
         }
 
+        // Vérification du type de transaction
         $transactionType = $transactionsTypesRepository->findOneBy(['code' => $data['type']]);
-        $date = new \DateTime($data['date']); // 🔥 Convertit proprement
+        if (!$transactionType) {
+            return new JsonResponse(['error' => 'Erreur rencontrée sur le type de transaction'], 400); // Données sont invalides
+        }
 
+        try {
+            $date = new \DateTime($data['date']);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Format de date invalide'], 400);
+        }
+        
         // Création de l'entité
         $transaction = new Transactions();
         $transaction->setDate($date);
         $transaction->setLabel($data['label']);
+        $transaction->setTransactionsTypes($transactionType);
 
         // Gestion du montant
-        $montant = str_replace('-', '', $data['montant']); // Supprime les tirets, surtout le - au début
         $montant = str_replace(',', '.', $data['montant']); // Remplace les virgules par des points
         $montant = number_format((float) $montant, 2, '.', ''); // Assure 2 décimales
-        $transaction->setMontant((string) $montant);
 
-        // On récupérer le Type de transaction
-        if ($transactionType) {
-            $transaction->setTransactionsTypes($transactionType);
-        } else {
-            return new JsonResponse(['error' => 'Erreur rencontrée sur le type de transaction'], 400); // Données sont invalides
+        // Gestion des montants en fonction du type de transaction
+        if ($transactionType->getCode() === 'OUT' && $montant > 0) {
+            $montant = -$montant; // Évite les montant positif
+        } elseif ($transactionType->getCode() === 'IN' && $montant < 0) {
+            $montant = abs($montant); // Évite les montant en négatif
         }
+
+        $transaction->setMontant((string) $montant);
         //Temporaire, a modifier une fois le système de connexion côté frontend en place
         $transaction->setUtilisateur($entityManager->getRepository(Utilisateurs::class)->findOneBy(['email' => 'test@gmail.com']));
-        
         // Validation des données
         $errors = $validator->validate($transaction);
-
+        
         // S'il y a des erreurs de validation
         if (count($errors) > 0) {
             $errorMessages = [];
