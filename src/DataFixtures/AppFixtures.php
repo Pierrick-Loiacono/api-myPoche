@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Abonnements;
 use Faker\Factory;
 use App\Entity\Pays;
 use App\Entity\Devis;
@@ -64,6 +65,17 @@ class AppFixtures extends Fixture
             $transaction->setTransactionsTypes($transaction->getMontant() > 0 ? $typesIN : $typesOUT);
             $transaction->setUtilisateur($utilisateur);
             $manager->persist($transaction);
+        }
+
+        for($i=0; $i<5; $i++){
+            $abonnement = new Abonnements;
+            $abonnement->setLabel($faker->sentence(6, true));
+            $abonnement->setMontant($faker->randomFloat(2, 3, 25));
+            $abonnement->setDateCreation($faker->dateTimeBetween('-1 years', 'now'));
+            $abonnement->setProchainPrelevement($faker->dateTimeBetween('-3 weeks', '+3 weeks'));
+            $abonnement->setFrequence($faker->randomFloat(0, 1, 12));
+            $abonnement->setUtilisateur($utilisateur);
+            $manager->persist($abonnement);
         }
 
         $manager->flush();
