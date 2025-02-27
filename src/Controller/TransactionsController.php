@@ -82,8 +82,8 @@ class TransactionsController extends AbstractController
                 return new JsonResponse(['errors' => $errorMessages], 400); // Retourner les erreurs de validation
             }
 
-            // $entityManager->persist($transaction);
-            // $entityManager->flush();
+            $entityManager->persist($transaction);
+            $entityManager->flush();
 
             // Retourner une réponse JSON avec un message de succès
             return new JsonResponse(['message' => 'Transaction ajoutée'], 200);
