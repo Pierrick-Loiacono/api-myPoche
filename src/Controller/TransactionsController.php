@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Transactions;
 use App\Entity\Utilisateurs;
-use App\Entity\TransactionsTypes;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\TransactionsRepository;
 use Symfony\Component\HttpFoundation\Request;
