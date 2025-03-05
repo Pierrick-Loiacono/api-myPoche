@@ -16,6 +16,17 @@ class AbonnementsRepository extends ServiceEntityRepository
         parent::__construct($registry, Abonnements::class);
     }
 
+    public function findAbonnementsATraiter(): array
+    {
+        $date = new \DateTime();
+        $date->setTime(0, 0, 0);
+        return $this->createQueryBuilder('a')
+            ->andWhere('a.prochain_prelevement <= :date')
+            ->setParameter('date', $date)
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Abonnements[] Returns an array of Abonnements objects
     //     */
