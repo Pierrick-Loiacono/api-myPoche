@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use NumberFormatter;
 use App\Entity\Transactions;
 use App\Entity\Utilisateurs;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,10 +20,29 @@ class TransactionsController extends AbstractController
     #[Route('/api/transactions', name: 'app_transactions', methods: ['GET'])]
     public function transactions(TransactionsRepository $trepo, SerializerInterface $serializer): JsonResponse
     {
+        // Récupération de toutes les transactions #TODO : Optimiser pour récupérer les transactions du mois
         $transactions = $trepo->findBy([], ['date' => 'DESC']);
-        $json = $serializer->serialize($transactions, 'json');
+        $jsonTransactions = $serializer->serialize($transactions, 'json');
 
-        return new JsonResponse($json, 200, [], true);
+        // Calcul du total des transactions #TODO : Optimiser en ayant un champ total dans la table de l'utilisateur
+        $formatter = new NumberFormatter('fr_FR', NumberFormatter::DECIMAL);
+
+        $totalAmount = array_sum(array_map(fn($t) => $t->getMontant(), $transactions));
+
+        // Calcul du total des transactions du mois en cours #TODO : Optimiser via requete dans le repo
+        $currentMonth = (new \DateTime())->format('Y-m'); // Ex: "2025-03"
+        $totalMonthAmount = array_sum(array_map(
+            fn($t) => $t->getDate()->format('Y-m') === $currentMonth ? $t->getMontant() : 0,
+            $transactions
+        ));
+
+        $json = [
+            'transactions' => json_decode($jsonTransactions, true),
+            'montantTotal' => $formatter->format($totalAmount). ' €',
+            'montantTotalMoisEnCours' => $formatter->format($totalMonthAmount). ' €',
+        ];
+
+        return new JsonResponse($json, 200);
     }
 
     #[Route('/api/new/transactions', name: 'new_transactions', methods: ['POST'])]
