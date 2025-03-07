@@ -12,20 +12,24 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Bundle\SecurityBundle\Security;
 
 class AbonnementsController extends AbstractController
 {
     #[Route('/api/abonnements', name: 'app_abonnements', methods: ['GET'])]
-    public function abonnements(AbonnementsRepository $aborepo, SerializerInterface $serializer): JsonResponse
+    #[IsGranted('ROLE_USER')]
+    public function abonnements(AbonnementsRepository $aborepo, SerializerInterface $serializer, Security $security): JsonResponse
     {
-        $abonnements = $aborepo->findBy([], ['label' => 'DESC']);
+        $abonnements = $aborepo->findBy(['utilisateur' => $security->getUser()->getId()], ['label' => 'DESC']);
         $json = $serializer->serialize($abonnements, 'json');
 
         return new JsonResponse($json, 200, [], true);
     }
 
     #[Route('/api/new/abonnement', name: 'new_abonnements', methods: ['POST'])]
-    public function postNewDevis(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): JsonResponse 
+    #[IsGranted('ROLE_USER')]
+    public function postNewDevis(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator, Security $security): JsonResponse
     {
         try {
 
@@ -60,7 +64,7 @@ class AbonnementsController extends AbstractController
             $abonnement->setProchainPrelevement($prochaineDatePrelevement);
             $abonnement->setFrequence($frequence);
             //Temporaire, a modifier une fois le système de connexion côté frontend en place
-            $abonnement->setUtilisateur($entityManager->getRepository(Utilisateurs::class)->findOneBy(['email' => 'test@gmail.com']));
+            $abonnement->setUtilisateur($entityManager->getRepository(Utilisateurs::class)->findOneBy(['id' => $security->getUser()->getId()]));
             // Validation des données
             $errors = $validator->validate($abonnement);
             // S'il y a des erreurs de validation

@@ -14,14 +14,18 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class TransactionsController extends AbstractController
 {
     #[Route('/api/transactions', name: 'app_transactions', methods: ['GET'])]
-    public function transactions(TransactionsRepository $trepo, SerializerInterface $serializer): JsonResponse
+    #[IsGranted('ROLE_USER')]
+    public function transactions(TransactionsRepository $trepo, SerializerInterface $serializer, Security $security): JsonResponse
     {
         // Récupération de toutes les transactions #TODO : Optimiser pour récupérer les transactions du mois
-        $transactions = $trepo->findBy([], ['date' => 'DESC']);
+        $transactions = $trepo->findBy(['utilisateur' => $security->getUser()->getId()], ['date' => 'DESC']);
         $jsonTransactions = $serializer->serialize($transactions, 'json');
 
         // Calcul du total des transactions #TODO : Optimiser en ayant un champ total dans la table de l'utilisateur
@@ -46,7 +50,8 @@ class TransactionsController extends AbstractController
     }
 
     #[Route('/api/new/transactions', name: 'new_transactions', methods: ['POST'])]
-    public function postNewDevis(Request $request, EntityManagerInterface $entityManager, TransactionsTypesRepository $transactionsTypesRepository, ValidatorInterface $validator): JsonResponse
+    #[IsGranted('ROLE_USER')]
+    public function postNewDevis(Request $request, Security $security, EntityManagerInterface $entityManager, TransactionsTypesRepository $transactionsTypesRepository, ValidatorInterface $validator): JsonResponse
     {
         try {
 
@@ -86,7 +91,7 @@ class TransactionsController extends AbstractController
             $transaction->setTransactionsTypes($transactionType);
             $transaction->setMontant((string) $montant);
             //Temporaire, a modifier une fois le système de connexion côté frontend en place
-            $transaction->setUtilisateur($entityManager->getRepository(Utilisateurs::class)->findOneBy(['email' => 'test@gmail.com']));
+            $transaction->setUtilisateur($entityManager->getRepository(Utilisateurs::class)->findOneBy(['id' => $security->getUser()->getId()]));
             // Validation des données
             $errors = $validator->validate($transaction);
             // S'il y a des erreurs de validation
