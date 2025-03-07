@@ -13,12 +13,11 @@ lexik_jwt_authentication:
             enabled: true
             name: bearer
         cookie:
-            enabled: true
-            name: auth_token
+            enabled: false
 
-    set_cookies:
-        auth_token:
-            lifetime: 10
-            httpOnly: true
-            samesite: lax
-            secure: true
+    # set_cookies:
+    #     auth_token:
+    #         lifetime: 10
+    #         httpOnly: true
+    #         samesite: lax
+    #         secure: true

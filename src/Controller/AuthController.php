@@ -17,7 +17,7 @@ class AuthController extends AbstractController
     {
         // Si aucun utilisateur n'est connecté, renvoyer une réponse d'erreur
         if (!$user || !$user instanceof Utilisateurs) {
-            return null;
+            return new JsonResponse(['error' => 'No user is logged in'], JsonResponse::HTTP_UNAUTHORIZED);
         }
 
         // Renvoyer les informations de l'utilisateur
